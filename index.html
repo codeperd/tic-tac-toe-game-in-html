@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic Tac Toe vs Bot</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    h1 {
+      color: #333;
+    }
+
+    #game {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 5px;
+      justify-content: center;
+      margin: 20px auto;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: white;
+      border: 2px solid #333;
+      font-size: 2.5em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.3s;
+    }
+
+    .cell:hover {
+      background: #f0f0f0;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 1.2em;
+    }
+
+    #reset {
+      margin-top: 15px;
+      padding: 8px 15px;
+      font-size: 1em;
+      cursor: pointer;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+
+    #reset:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tic Tac Toe vs Bot</h1>
+  <div id="game"></div>
+  <div id="status">Your turn (X)</div>
+  <button id="reset">Restart Game</button>
+
+  <script>
+    const game = document.getElementById("game");
+    const statusText = document.getElementById("status");
+    const resetButton = document.getElementById("reset");
+
+    let board = ["", "", "", "", "", "", "", "", ""];
+    let gameActive = true;
+    const player = "X"; // You
+    const bot = "O";    // Computer
+
+    // Create the 9 cells
+    for (let i = 0; i < 9; i++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.dataset.index = i;
+      cell.addEventListener("click", handlePlayerMove);
+      game.appendChild(cell);
+    }
+
+    function handlePlayerMove(e) {
+      const index = e.target.dataset.index;
+      if (board[index] !== "" || !gameActive) return;
+
+      makeMove(index, player);
+
+      if (checkWinner(board, player)) {
+        statusText.textContent = "🎉 You win!";
+        gameActive = false;
+        return;
+      }
+
+      if (board.every(cell => cell !== "")) {
+        statusText.textContent = "It's a draw!";
+        gameActive = false;
+        return;
+      }
+
+      statusText.textContent = "Bot's turn...";
+      setTimeout(botMove, 600); // Bot moves after short delay
+    }
+
+    function botMove() {
+      // Simple AI: choose a random empty cell
+      const emptyCells = board
+        .map((val, idx) => (val === "" ? idx : null))
+        .filter(v => v !== null);
+
+      if (emptyCells.length === 0 || !gameActive) return;
+
+      const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+      makeMove(randomIndex, bot);
+
+      if (checkWinner(board, bot)) {
+        statusText.textContent = "🤖 Bot wins!";
+        gameActive = false;
+        return;
+      }
+
+      if (board.every(cell => cell !== "")) {
+        statusText.textContent = "It's a draw!";
+        gameActive = false;
+        return;
+      }
+
+      statusText.textContent = "Your turn (X)";
+    }
+
+    function makeMove(index, playerSymbol) {
+      board[index] = playerSymbol;
+      document.querySelectorAll(".cell")[index].textContent = playerSymbol;
+    }
+
+    function checkWinner(b, symbol) {
+      const winPatterns = [
+        [0,1,2], [3,4,5], [6,7,8],
+        [0,3,6], [1,4,7], [2,5,8],
+        [0,4,8], [2,4,6]
+      ];
+
+      return winPatterns.some(pattern => 
+        pattern.every(i => b[i] === symbol)
+      );
+    }
+
+    resetButton.addEventListener("click", resetGame);
+
+    function resetGame() {
+      board = ["", "", "", "", "", "", "", "", ""];
+      gameActive = true;
+      document.querySelectorAll(".cell").forEach(cell => cell.textContent = "");
+      statusText.textContent = "Your turn (X)";
+    }
+  </script>
+
+</body>
+</html>
